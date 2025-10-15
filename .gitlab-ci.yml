@@ -12,41 +12,39 @@ cache:
   paths:
     - .m2/repository
 
+# ===== UI Selenium Tests =====
 ui-tests:
   stage: test-ui
-  image: maven:3.8-openjdk-11
-  before_script:
-    - apt-get update && apt-get install -y wget unzip
-    - wget -q https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-    - apt-get install -y ./google-chrome-stable_current_amd64.deb
+  image: selenium/standalone-chrome:latest
   script:
+    - echo "Running Selenium UI tests in headless Chrome"
     - mvn clean test -Dtest=Scenario1_Autocomplete,Scenario2_Form,Scenario3_Alerts,Scenario4_Buttons,Scenario5_Navigation
   artifacts:
     when: always
     paths:
-      - target/surefire-reports/
+      - src/main/java/com/formy/target/surefire-reports/
     expire_in: 1 week
 
+# ===== API Postman Tests =====
 api-tests:
   stage: test-api
-  image: node:16
-  before_script:
-    - npm install -g newman
+  image: postman/newman:latest
   script:
-    - newman run "Reqres-API-Tests.postman_collection.json" -r htmlextra,cli
+    - echo "Running Postman API tests"
+    - newman run api/postman/reqres-collection.json -r cli,htmlextra --reporter-htmlextra-export newman/report.html
   artifacts:
     when: always
     paths:
       - newman/
     expire_in: 1 week
 
+# ===== Performance Tests (JMeter) =====
 performance-tests:
   stage: test-performance
   image: justb4/jmeter:5.5
   script:
     - mkdir -p performance-results
-    - echo "Tests de performance simulés - 50 utilisateurs Reqres.in"
-    - echo "Temps réponse: 85ms | Débit: 1.6/sec | Erreurs: 0%"
+    - jmeter -n -t performance/performance_test.jmx -l performance-results/results.jtl -j performance-results/jmeter.log
   artifacts:
     when: always
     paths:
@@ -55,6 +53,7 @@ performance-tests:
   only:
     - main
 
+# ===== Security Tests (OWASP ZAP) =====
 security-tests:
   stage: test-security
   image: owasp/zap2docker-stable
@@ -68,22 +67,27 @@ security-tests:
     expire_in: 1 week
   allow_failure: true
 
+# ===== Consolidated Report & Notification =====
 generate-report:
   stage: report
   image: alpine:latest
   script:
-    - echo "📊 GÉNÉRATION DES RAPPORTS DE TEST"
-    - echo "✅ Tests UI Selenium: 5 scénarios exécutés"
-    - echo "✅ Tests API Postman: Collection Reqres.in validée"
-    - echo "✅ Tests Performance: 50 utilisateurs simulés"
-    - echo "✅ Tests Sécurité: Scan OWASP ZAP complété"
-    - echo "🎉 PIPELINE CI/CD TERMINÉ AVEC SUCCÈS"
+    - echo "📊 GENERATING COMBINED REPORTS"
+    - echo "✅ Selenium UI Tests reports: src/main/java/com/formy/target/surefire-reports/"
+    - echo "✅ Postman API Tests report: newman/report.html"
+    - echo "✅ Performance Tests report: performance-results/"
+    - echo "✅ Security Tests report: security-results/"
+    - echo "🎉 PIPELINE CI/CD FINISHED SUCCESSFULLY"
   artifacts:
     when: always
     paths:
+      - src/main/java/com/formy/target/surefire-reports/
+      - newman/
       - performance-results/
       - security-results/
     expire_in: 1 month
   dependencies:
     - ui-tests
     - api-tests
+    - performance-tests
+    - security-tests

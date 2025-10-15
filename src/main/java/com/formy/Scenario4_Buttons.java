@@ -13,19 +13,18 @@ public class Scenario4_Buttons {
             driver.get("https://formy-project.herokuapp.com/buttons");
             Thread.sleep(2000);
             
-            // ✅ CORRECTION : Les VRAIS boutons sur la page Formy Buttons
             String[] buttonSelectors = {
-                "//button[text()='Primary']",     // Primary button
-                "//button[text()='Success']",     // Success button  
-                "//button[text()='Info']",        // Info button
-                "//button[text()='Warning']",     // Warning button
-                "//button[text()='Danger']",      // Danger button
-                "//button[text()='Left']",        // Left button
-                "//button[text()='Middle']",      // Middle button  
-                "//button[text()='Right']",       // Right button
-                "//button[text()='1']",           // Button 1
-                "//button[text()='2']",           // Button 2
-                "//button[contains(@class, 'dropdown')]"  // Dropdown button
+                "//button[text()='Primary']",     
+                "//button[text()='Success']",     
+                "//button[text()='Info']",       
+                "//button[text()='Warning']",     
+                "//button[text()='Danger']",     
+                "//button[text()='Left']",        
+                "//button[text()='Middle']",       
+                "//button[text()='Right']",       
+                "//button[text()='1']",           
+                "//button[text()='2']",           
+                "//button[contains(@class, 'dropdown')]" 
             };
             
             for (String xpath : buttonSelectors) {

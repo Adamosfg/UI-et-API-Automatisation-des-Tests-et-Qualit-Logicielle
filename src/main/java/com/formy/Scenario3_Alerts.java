@@ -13,14 +13,11 @@ public class Scenario3_Alerts {
             driver.get("https://formy-project.herokuapp.com/switch-window");
             Thread.sleep(2000);
             
-            // ✅ CORRECTION : Bon sélecteur pour le bouton Alert
             driver.findElement(By.id("alert-button")).click();
-            
-            // Gérer l'alerte
+        
             driver.switchTo().alert().accept();
             Thread.sleep(1000);
-            
-            // ✅ CORRECTION : Bon sélecteur pour le nouvel onglet
+
             driver.findElement(By.id("new-tab-button")).click();
             Thread.sleep(2000);
             
